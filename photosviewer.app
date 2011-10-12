@@ -1,5 +1,5 @@
 {
-    "title":"Masonry",
+    "title":"Jer Test",
     "action":"View photos",
     "desc":"A simple way to view your photos.",
     "status":"stable",
