@@ -1,35 +1,25 @@
 /* Generic log function for debugging. */
 var log = function(msg) { if (console && console.log) console.debug(msg); };
-var baseUrl = '';
+var baseUrl = 'http://localhost:8042';
 
 function photoApp() {
     // set the params if not specified
     var offset = 0;
-    var limit = 50;
+    var limit = 200;
     var $photosList = $("#main");
-
-    var timeSort = function(lh, rh) {
-                var rhc = parseInt(rh.timestamp);
-                var lhc = parseInt(lh.timestamp);
-                //log(rhc);
-                //log(lhc);
-                if (isNaN(rhc) || isNaN(lhc)) {
-                    console.dir(rh);
-                    console.dir(lh);
-                }
-                if (rhc > (Date.now() / 1000)) rhc = rhc / 1000;
-                if (lhc > (Date.now() / 1000)) lhc = lhc / 1000;
-                return rhc - lhc;
-    };
 
     var HTMLFromPhotoJSON = function(photos) {
         var p, title, photoHTML = "";
-        // removed for the time being, the query should return time sorted data
-        // photos = photos.sort(timeSort);
         for (var i in photos) {
       p = photos[i];
-      title = p.title ? p.title : "Unititled";
-      photoHTML += '<div class="box"><div id="' + p._id + '" class="photo"><img src="' + baseUrl + '/Me/photos/image/' + p.id+ '" style="max-width:300px" /><div class="basic-data">'+title+'</div></div></div>';
+      if(!p.photos) continue;
+      title = p.name ? p.name : "";
+      for (var j in p.photos)
+      {
+          if(p.photos[j].indexOf("blank_") > 0) continue;
+          if(p.photos[j].indexOf("default_profile") > 0) continue;
+          photoHTML += '<div class="box"><div id="' + p._id + j + '" class="photo"><img src="' + p.photos[j] + '" style="max-width:100px" /><div class="basic-data">'+title+'</div></div></div>';
+      }
   }
         return photoHTML;
     };
@@ -41,7 +31,7 @@ function photoApp() {
   $photosList.html('');
 
   // populate the list with our photos
-  if (photos.length == 0) $photosList.append("<div>Sorry, no photos found!</div>");
+  if (photos.length == 0) $photosList.append("<div>Sorry, no friend photos found!</div>");
 
   $photosList.append(HTMLFromPhotoJSON(photos));
 
@@ -73,28 +63,21 @@ function photoApp() {
     var sort = '\'{"timestamp":-1}\'';
 
     var loadMorePhotosHandler = function() {
-        $.getJSON( baseUrl +
-      '/query/getPhoto',
-      {
-                'offset':offset,
-                'limit':limit,
-                'sort':sort
-            },
-            getMorePhotosCB
-        );
-
+        $.getJSON( baseUrl + '/Me/contacts/',
+        {
+            'offset':offset,
+            'limit':limit,
+            'fields':'{"name":1,"photos":1}'
+        }, getMorePhotosCB);
     };
 
     // init
-    $.getJSON( baseUrl +
-  '/query/getPhoto',
-  {
-            'offset':offset,
-            'limit':limit,
-            'sort':sort
-    },
-  getPhotosCB
-    );
+    $.getJSON( baseUrl + '/Me/contacts/',
+    {
+        'offset':offset,
+        'limit':limit,
+        'fields':'{"name":1,"photos":1}'
+    }, getPhotosCB);
 
     $("#moarphotos").click( loadMorePhotosHandler );
 
