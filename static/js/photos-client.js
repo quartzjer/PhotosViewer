@@ -1,6 +1,6 @@
 /* Generic log function for debugging. */
 var log = function(msg) { if (console && console.log) console.debug(msg); };
-var baseUrl = 'http://localhost:8042';
+var baseUrl = '';//'http://localhost:8042';
 
 function photoApp() {
     // set the params if not specified
